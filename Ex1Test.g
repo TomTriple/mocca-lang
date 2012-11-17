@@ -5,16 +5,31 @@ options {
 // removing k means k=*
 }
 
+@members {
+
+  this.symtabVariables = {};
+  this.symtabFunctions = {};
+
+}
+
 prog: statement* EOF;
 
 statement: ID '=' value ';' { 
-             console.debug("Assign: "+$ID.text+" = "+$value.text); 
+             this.symtabVariables[$ID.text] = $value.text;
+             console.debug("AssignmentValue: "+$ID.text+" = "+$value.text); 
            }
          | ID 'function' '(' argumentList? ')' '{' '...' '}' ';' { 
-             console.debug("Function: "+$ID.text); 
+             this.symtabFunctions[$ID.text] = "--- missing function body ---";
+             console.debug("Function: "+$ID.text+" with args:"+$argumentList.text);
            }
          | ID 'function' '(' argumentList? ')' ';' {
-             console.debug("ForwardDecl: "+$ID.text); 
+             console.debug("ForwardDecl: "+$ID.text+" with args:"+$argumentList.text);
+           }
+         | {this.symtabVariables[this.input.LT(3).getText()] !== undefined}? lval=ID '=' rval=ID ';' {
+             console.debug("AssignmentVar: "+$rval.text+" to "+$lval.text);
+           }
+         | {this.symtabVariables[this.input.LT(3).getText()] === undefined}? lval=ID '=' rval=ID ';' {
+             console.debug("AssignmentFunction: "+$rval.text+" to "+$lval.text);
            }
          ;
 

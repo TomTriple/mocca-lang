@@ -9,7 +9,9 @@
 <script type="text/javascript">
 
   var input = "value = 23;";
-  input += "greet function() { ... };";
+  input += "greet function(a, b, c, d, e, f, g, h, i);";
+  input += "bla1 = value;";
+  input += "bla2 = greet;";
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);
