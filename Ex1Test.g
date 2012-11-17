@@ -2,19 +2,21 @@ grammar Ex1Test;
 
 options {
   language=JavaScript;
-  k=2;
+  k=4;
 }
 
 prog: statement* EOF;
 
-// k=1 is not enough lookahead to distinguish between the alternatives in statement
-statement: ID '=' value end           { console.debug("Assign: "+$ID.text+" = "+$value.text); }
-         | ID '->' '{' '...' '}' end  { console.debug("Function: "+$ID.text); }
+statement: 'var' ID '=' value ';' { 
+             console.debug("Assign: "+$ID.text+" = "+$value.text); 
+           }
+         | 'var' ID '=' 'function' '()' '{' '...' '}' ';' { 
+             console.debug("Function: "+$ID.text); 
+           }
          ;
 
 value: INTEGER|STRING;
 
-end: ';';
 
 
 ID: CHAR (CHAR|'0'..'9')*;
