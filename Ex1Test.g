@@ -2,7 +2,7 @@ grammar Ex1Test;
 
 options {
   language=JavaScript;
-  k=1;
+// removing k means k=*
 }
 
 prog: statement* EOF;
@@ -10,11 +10,16 @@ prog: statement* EOF;
 statement: ID '=' value ';' { 
              console.debug("Assign: "+$ID.text+" = "+$value.text); 
            }
-         | 'function' ID '()' '{' '...' '}' ';' { 
+         | ID 'function' '(' argumentList? ')' '{' '...' '}' ';' { 
              console.debug("Function: "+$ID.text); 
+           }
+         | ID 'function' '(' argumentList? ')' ';' {
+             console.debug("ForwardDecl: "+$ID.text); 
            }
          ;
 
+
+argumentList: ID (',' ID)*;
 value: INTEGER|STRING;
 
 
