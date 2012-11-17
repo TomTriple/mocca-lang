@@ -2,21 +2,24 @@ grammar Ex1Test;
 
 options {
   language=JavaScript;
-  k=1;
+  k=2;
 }
 
 prog: statement* EOF;
-statement: ID '=' value { console.debug("Assign: "+$ID.text+" = "+$value.text); }
-//          | ID '->' '{' DOTS '}'
+
+// k=1 is not enough lookahead to distinguish between the alternatives in statement
+statement: ID '=' value end           { console.debug("Assign: "+$ID.text+" = "+$value.text); }
+         | ID '->' '{' '...' '}' end  { console.debug("Function: "+$ID.text); }
          ;
 
 value: INTEGER|STRING;
+
+end: ';';
 
 
 ID: CHAR (CHAR|'0'..'9')*;
 INTEGER: '0'..'9'+;
 STRING: '"' (.)* '"';
-EQ: '=';
 WS: (' '|'\t'|'\r'|'\n') { this.skip(); };
 
 fragment CHAR: 'a'..'z'|'A'..'Z';

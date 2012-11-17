@@ -8,9 +8,11 @@
 
 <script type="text/javascript">
 
-  var input = "value = 23",
-    cstream = new org.antlr.runtime.ANTLRStringStream(input),
-    lexer = new Ex1TestLexer(cstream);
+  var input = "value = 23;";
+  input += "greetingFunction -> { ... };";
+
+  var cstream = new org.antlr.runtime.ANTLRStringStream(input);
+  var lexer = new Ex1TestLexer(cstream);
   var tstream = new org.antlr.runtime.CommonTokenStream(lexer);
   var parser = new Ex1TestParser(tstream);
   var r = parser.prog();
