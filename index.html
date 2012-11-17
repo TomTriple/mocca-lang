@@ -8,9 +8,8 @@
 
 <script type="text/javascript">
 
-  var input = "var value = 23;";
-  input += "var name = \"my name\";";
-  input += "var greet = function() { ... };";
+  var input = "value = 23;";
+  input += "function greet() { ... };";
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);

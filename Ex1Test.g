@@ -2,15 +2,15 @@ grammar Ex1Test;
 
 options {
   language=JavaScript;
-  k=4;
+  k=1;
 }
 
 prog: statement* EOF;
 
-statement: 'var' ID '=' value ';' { 
+statement: ID '=' value ';' { 
              console.debug("Assign: "+$ID.text+" = "+$value.text); 
            }
-         | 'var' ID '=' 'function' '()' '{' '...' '}' ';' { 
+         | 'function' ID '()' '{' '...' '}' ';' { 
              console.debug("Function: "+$ID.text); 
            }
          ;
