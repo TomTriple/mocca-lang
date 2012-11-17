@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+<script type="text/javascript" src="antlr3-all.js"></script>
+<script type="text/javascript" src="Ex1TestLexer.js"></script>
+<script type="text/javascript" src="Ex1TestParser.js"></script>
+
+<script type="text/javascript">
+
+  var input = "value = 23",
+    cstream = new org.antlr.runtime.ANTLRStringStream(input),
+    lexer = new Ex1TestLexer(cstream);
+  var token = lexer.nextToken();
+  while(token.getType() !== -1) {
+    console.debug(token.getText());
+    token = lexer.nextToken();
+  }
+
+  /*
+  tstream = new org.antlr.runtime.CommonTokenStream(lexer),
+  parser = new Ex1Parser(tstream),
+  r = parser.prog();
+*/
+</script>
+
+<script type="text/javascript">
+
+</script>
+
+                       </head>
+                       <body>
+
+                         <div>
+                          <textarea id="editor"></textarea>
+                         </div>
+
+                       </body>
+                     </html>
+
