@@ -5,19 +5,27 @@
 <script type="text/javascript" src="antlr3-all.js"></script>
 <script type="text/javascript" src="Ex1TestLexer.js"></script>
 <script type="text/javascript" src="Ex1TestParser.js"></script>
+<script type="text/javascript" src="Ex1Walker.js"></script>
 
 <script type="text/javascript">
 
-  var input = "value = 23;";
-  input += "greet function(a, b, c, d, e, f, g, h, i);";
-  input += "bla1 = value;";
-  input += "bla2 = greet;";
+  var input = "name = \"thomas\"; puts name; fn -> { name = \"franz\"; puts name; fn2 -> { puts name; };  }; ";
+  input += "if 2 == 2 do theName = \"habedere\"; fn -> { puts theName; }; fn(); end; ";
+  input += "obj = { alter = 31; strasse = \"falkensteiner weg 3\"; }; puts obj.strasse; ";
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);
   var tstream = new org.antlr.runtime.CommonTokenStream(lexer);
   var parser = new Ex1TestParser(tstream);
   var r = parser.prog();
+//  console.debug(r.getTree().toStringTree());
+  
+  
+var nodes = new org.antlr.runtime.tree.CommonTreeNodeStream(r.getTree());
+nodes.setTokenStream(tstream);
+var walker = new Ex1Walker(nodes);
+walker.prog().interpret();
+
 </script>
 
 <script type="text/javascript">
