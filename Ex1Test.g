@@ -3,7 +3,6 @@ grammar Ex1Test;
 options {
   language=JavaScript;
   output=AST;
-// removing k means k=*
 }
 
 tokens {
@@ -17,22 +16,45 @@ tokens {
 prog: exprStmt* EOF -> exprStmt*
     ;
 
-exprStmt: ID ':' 
+exprStmt: ID ':'
           (
             expr -> ^(':' ID expr)
             |
             BOOLEAN -> ^(':' ID BOOLEAN)
-          ) 
+          )
           ';'
         ;
 
-fn: a=ID ':' (args+=ID ':'?)* '{' body+=exprStmt* '}' -> ^(':' $a $args* $body*)
-  ;
-
-expr: (exprMult -> exprMult) ('+' e=exprMult -> ^('+' $expr $e))*
+expr: (exprCompare -> exprCompare) 
+        (
+          ('&&' e=exprCompare -> ^('&&' $expr $e))
+        )?
     ;
 
-exprMult:  (atom -> atom) ('*' e=atom -> ^('*' $exprMult $e))*
+exprCompare: (exprAdd -> exprAdd) 
+        (
+          ('==' e=exprAdd -> ^('==' $exprCompare $e))
+          |
+          ('>' e=exprAdd -> ^('>' $exprCompare $e))
+          |
+          ('<' e=exprAdd -> ^('<' $exprCompare $e))
+        )?
+    ;
+
+exprAdd: (exprMult -> exprMult) 
+          (
+            ('+' e=exprMult -> ^('+' $exprAdd $e)) 
+            |
+            ('-' e=exprMult -> ^('-' $exprAdd $e))
+          )*
+    ;
+
+exprMult:  (atom -> atom) 
+          (
+            ('*' e=atom -> ^('*' $exprMult $e))
+            |
+            ('/' e=atom -> ^('/' $exprMult $e))
+           )*
         ;
 
 atom: INTEGER

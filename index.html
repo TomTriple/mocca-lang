@@ -11,8 +11,12 @@
 
   var 
   input =  'five: 5;';
+  input += 'six: 6;';
   input += 'truth: T;';
-  input += 'myValue: five + 4 * 2;';
+  input += 'myValue: (five - 4 / 2 + 7) / 45 + 5;';
+  input += 'result1: (five+five)*2 == six + 7 * 2;';
+  input += 'result2: five < six;';
+  input += 'all: result1 == result2 && result2 == result1;'
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);

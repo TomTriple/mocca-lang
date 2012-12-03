@@ -72,6 +72,20 @@ options {
     };
   };
 
+  L.Sub = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() - b.toInt(), L.T.INT);
+        return result;
+      }
+      throw new Error("<Sub: Numeric operands expected. State: a="+a+", b="+b+">");
+    };
+  };
+
   L.Mult = function(node1, node2) {
     this.node1 = node1;
     this.node2 = node2;
@@ -83,6 +97,79 @@ options {
         return result;
       }
       throw new Error("<Mult: Numeric operands expected. State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Divide = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() / b.toInt(), L.T.INT);
+        return result;
+      }
+      throw new Error("<Divide: Numeric operands expected. State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Eq = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() === b.toInt(), L.T.BOOLEAN);
+        return result;
+      } else if(a.isBoolean() && b.isBoolean()) {
+        var result = new L.Value(a.toBoolean() === b.toBoolean(), L.T.BOOLEAN);
+        return result;
+      }
+      throw new Error("<Eq: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Gt = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() > b.toInt(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Gt: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Lt = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() < b.toInt(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Gt: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.And = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isBoolean() && b.isBoolean()) {
+        var result = new L.Value(a.toBoolean() && b.toBoolean(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<And: State: a="+a+", b="+b+">");
     };
   };
 
@@ -119,7 +206,7 @@ options {
     };
     this.toBoolean = function() {
       if(this.type === L.T.BOOLEAN) {
-        return this.data === "T" ? true : false;
+        return this.data;
       }
     };
     this.isBoolean = function() {
@@ -153,18 +240,24 @@ prog returns [node]
     ;
 
 exprStmt returns [node]
-        : ^(':' ID expr) {
-            $node = new L.Assignment(this.currentScope, $ID.text, $expr.node);
+        : ^(':' ID exprAdd) {
+            $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node);
           }
         | ^(':' ID BOOLEAN) {
-            var node = new L.Literal(new L.Value($BOOLEAN.text, L.T.BOOLEAN));
+            var node = new L.Literal(new L.Value($BOOLEAN.text === "T", L.T.BOOLEAN));
             $node = new L.Assignment(this.currentScope, $ID.text, node);
           }
         ;
 
-expr returns [node]
-    : ^('+' a=expr b=expr) { $node = new L.Add($a.node, $b.node); }
-    | ^('*' a=expr b=expr) { $node = new L.Mult($a.node, $b.node); }
+exprAdd returns [node]
+    : ^('+' a=exprAdd b=exprAdd) { $node = new L.Add($a.node, $b.node); }
+    | ^('-' a=exprAdd b=exprAdd) { $node = new L.Sub($a.node, $b.node); }
+    | ^('*' a=exprAdd b=exprAdd) { $node = new L.Mult($a.node, $b.node); }
+    | ^('/' a=exprAdd b=exprAdd) { $node = new L.Divide($a.node, $b.node); }
+    | ^('==' a=exprAdd b=exprAdd) { $node = new L.Eq($a.node, $b.node); }
+    | ^('>' a=exprAdd b=exprAdd) { $node = new L.Gt($a.node, $b.node); }
+    | ^('<' a=exprAdd b=exprAdd) { $node = new L.Lt($a.node, $b.node); }
+    | ^('&&' a=exprAdd b=exprAdd) { $node = new L.And($a.node, $b.node); }
     | i=INTEGER { 
         var valueInt = new L.Value($i.text, L.T.INT);
         $node = new L.Literal(valueInt);
