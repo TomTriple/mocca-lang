@@ -263,6 +263,19 @@ options {
     };
   };
 
+  L.FunctionCall = function(scope, id, node) {
+    this.scope = scope;
+    this.id = id;
+    this.node = node;
+    this.interpret = function(){
+      var fn = this.scope.resolve(id);
+      if(fn !== undefined && fn.value.isFunction())
+        fn.value.toFunction().invoke(this.node);
+      else
+        throw new Error("<FunctionCall: fn "+this.id+" is undefined or not a function>");
+    };
+  };
+
   L.T = { INT: 1, FN: 2, BOOLEAN: 3 };
   L.Value = function(data, type) {
     this.data = data;
@@ -284,7 +297,16 @@ options {
       return this.type === L.T.BOOLEAN;
     };
     this.toString = function() {
-      return "<type: "+this.typeString()+", data: "+this.data+">"
+      if(this.isBoolean())
+        return (this.toBoolean() ? "T" : "F") + " ("+this.typeString()+")";
+      return this.data+ " ("+this.typeString()+")";
+    };
+    this.isFunction = function() {
+      return this.type === L.T.FN;
+    };
+    this.toFunction = function(){
+      if(this.type === L.T.FN)
+        return this.data;
     };
     this.typeString = function() {
       for(var prop in L.T) {
@@ -299,7 +321,16 @@ options {
     this.value = value;
   };
 
+  L.PutsFunction = function() {
+    this.invoke = function(args){
+      var result = args.interpret();
+      console.debug(result.toString());
+    };
+  };
+
   this.currentScope = new L.Scope("global", undefined);
+  var putsFnValue = new L.Value(new L.PutsFunction(), L.T.FN);
+  this.currentScope.define(new L.SymVar("puts", putsFnValue));
 
 }
 
@@ -311,9 +342,8 @@ prog returns [node]
     ;
 
 exprStmt returns [node]
-        : ^(':' ID exprAdd) {
-            $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node);
-          }
+        : ^(':' ID exprAdd) { $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node); }
+        | ^(FN_CALL ID exprAdd) { $node = new L.FunctionCall(this.currentScope, $ID.text, $exprAdd.node); }
         ;
 
 exprAdd returns [node]

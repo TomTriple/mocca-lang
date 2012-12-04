@@ -16,15 +16,15 @@
   input += 'myValue: (five - 4 / 2 + 7) / 45 + 5;';
   input += 'result1: (five+five)*2 == six + 7 * 2;';
   input += 'result2: five < six;';
-  input += 'all: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);';
-  input += 'allNeg: !!!!!all;'
+  input += 'allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);';
+  input += 'puts !!((five + six >= 11) && allTrue && T);';
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);
   var tstream = new org.antlr.runtime.CommonTokenStream(lexer);
   var parser = new Ex1TestParser(tstream);
   var r = parser.prog();
-  console.debug(r.getTree().toStringTree());
+  // console.debug(r.getTree().toStringTree());
 
 var nodes = new org.antlr.runtime.tree.CommonTreeNodeStream(r.getTree());
 nodes.setTokenStream(tstream);
