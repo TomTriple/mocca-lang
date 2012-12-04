@@ -16,28 +16,34 @@ tokens {
 prog: exprStmt* EOF -> exprStmt*
     ;
 
-exprStmt: ID ':'
-          (
-            expr -> ^(':' ID expr)
-            |
-            BOOLEAN -> ^(':' ID BOOLEAN)
-          )
-          ';'
+exprStmt: ID ':' expr ';' -> ^(':' ID expr)
         ;
 
-expr: (exprCompare -> exprCompare) 
+expr: (exprAnd -> exprAnd) 
         (
-          ('&&' e=exprCompare -> ^('&&' $expr $e))
-        )?
+          ('||' e=exprAnd -> ^('||' $expr $e))
+        )*
+    ;
+
+exprAnd: (exprCompare -> exprCompare) 
+        (
+          ('&&' e=exprCompare -> ^('&&' $exprAnd $e))
+        )*
     ;
 
 exprCompare: (exprAdd -> exprAdd) 
         (
           ('==' e=exprAdd -> ^('==' $exprCompare $e))
           |
+          ('!=' e=exprAdd -> ^('!=' $exprCompare $e))
+          |
           ('>' e=exprAdd -> ^('>' $exprCompare $e))
           |
           ('<' e=exprAdd -> ^('<' $exprCompare $e))
+          |
+          ('>=' e=exprAdd -> ^('>=' $exprCompare $e))
+          |
+          ('<=' e=exprAdd -> ^('<=' $exprCompare $e))
         )?
     ;
 
@@ -49,16 +55,23 @@ exprAdd: (exprMult -> exprMult)
           )*
     ;
 
-exprMult:  (atom -> atom) 
+exprMult:(unary -> unary) 
           (
-            ('*' e=atom -> ^('*' $exprMult $e))
+            ('*' e=unary -> ^('*' $exprMult $e))
             |
-            ('/' e=atom -> ^('/' $exprMult $e))
+            ('/' e=unary -> ^('/' $exprMult $e))
            )*
         ;
 
+unary: atom
+     | '!' unary -> ^('!' unary) // points again to unary as one can chain multiple negations like !!!true;
+     ;
+
+// matching for BOOLEAN in atom means one can syntactically use TRUE in an arithmetic expression which
+// doesn´t make much sense. Cases like this need to be catched in the semantic analysis phase.
 atom: INTEGER
      | ID
+     | BOOLEAN
      | '(' expr ')' -> expr
      ;
 

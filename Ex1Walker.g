@@ -131,6 +131,23 @@ options {
     };
   };
 
+  L.Neq = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() !== b.toInt(), L.T.BOOLEAN);
+        return result;
+      } else if(a.isBoolean() && b.isBoolean()) {
+        var result = new L.Value(a.toBoolean() !== b.toBoolean(), L.T.BOOLEAN);
+        return result;
+      }
+      throw new Error("<Neq: State: a="+a+", b="+b+">");
+    };
+  };
+
   L.Gt = function(node1, node2) {
     this.node1 = node1;
     this.node2 = node2;
@@ -155,7 +172,35 @@ options {
         var result = new L.Value(a.toInt() < b.toInt(), L.T.BOOLEAN);
         return result;
       } 
-      throw new Error("<Gt: State: a="+a+", b="+b+">");
+      throw new Error("<Lt: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Gte = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() >= b.toInt(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Gte: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Lte = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isInt() && b.isInt()) {
+        var result = new L.Value(a.toInt() <= b.toInt(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Lte: State: a="+a+", b="+b+">");
     };
   };
 
@@ -170,6 +215,32 @@ options {
         return result;
       } 
       throw new Error("<And: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Or = function(node1, node2) {
+    this.node1 = node1;
+    this.node2 = node2;
+    this.interpret = function() {
+      var a = node1.interpret();
+      var b = node2.interpret();
+      if(a.isBoolean() && b.isBoolean()) {
+        var result = new L.Value(a.toBoolean() || b.toBoolean(), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Or: State: a="+a+", b="+b+">");
+    };
+  };
+
+  L.Negate = function(node1) {
+    this.node1 = node1;
+    this.interpret = function() {
+      var a = node1.interpret();
+      if(a.isBoolean()) {
+        var result = new L.Value(!(a.toBoolean()), L.T.BOOLEAN);
+        return result;
+      } 
+      throw new Error("<Negate: State: a="+a+">");
     };
   };
 
@@ -243,10 +314,6 @@ exprStmt returns [node]
         : ^(':' ID exprAdd) {
             $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node);
           }
-        | ^(':' ID BOOLEAN) {
-            var node = new L.Literal(new L.Value($BOOLEAN.text === "T", L.T.BOOLEAN));
-            $node = new L.Assignment(this.currentScope, $ID.text, node);
-          }
         ;
 
 exprAdd returns [node]
@@ -255,15 +322,24 @@ exprAdd returns [node]
     | ^('*' a=exprAdd b=exprAdd) { $node = new L.Mult($a.node, $b.node); }
     | ^('/' a=exprAdd b=exprAdd) { $node = new L.Divide($a.node, $b.node); }
     | ^('==' a=exprAdd b=exprAdd) { $node = new L.Eq($a.node, $b.node); }
+    | ^('!=' a=exprAdd b=exprAdd) { $node = new L.Neq($a.node, $b.node); }
     | ^('>' a=exprAdd b=exprAdd) { $node = new L.Gt($a.node, $b.node); }
     | ^('<' a=exprAdd b=exprAdd) { $node = new L.Lt($a.node, $b.node); }
     | ^('&&' a=exprAdd b=exprAdd) { $node = new L.And($a.node, $b.node); }
+    | ^('||' a=exprAdd b=exprAdd) { $node = new L.Or($a.node, $b.node); }
+    | ^('>=' a=exprAdd b=exprAdd) { $node = new L.Gte($a.node, $b.node); }
+    | ^('<=' a=exprAdd b=exprAdd) { $node = new L.Lte($a.node, $b.node); }
+    | ^('!' a=exprAdd) { $node = new L.Negate($a.node); }
     | i=INTEGER { 
         var valueInt = new L.Value($i.text, L.T.INT);
         $node = new L.Literal(valueInt);
       }
     | i=ID {
         var node = new L.Lookup(this.currentScope, $i.text);
+        $node = node;
+      }
+    | i=BOOLEAN {
+        var node = new L.Literal(new L.Value($i.text === "T", L.T.BOOLEAN));
         $node = node;
       }
     ;
