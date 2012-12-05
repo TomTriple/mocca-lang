@@ -362,24 +362,24 @@ prog returns [node]
     ;
 
 exprStmt returns [node]
-        : ^(':' ID exprAdd) { $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node); }
-        | ^(FN_CALL ID {var node = new L.FunctionCall(this.currentScope, $ID.text);} (e=exprAdd {node.addArgument($e.node);})*) { $node = node; }
+        : ^(':' ID expr) { $node = new L.Assignment(this.currentScope, $ID.text, $expr.node); }
+        | ^(FN_CALL ID {var node = new L.FunctionCall(this.currentScope, $ID.text);} (e=expr {node.addArgument($e.node);})*) { $node = node; }
         ;
 
-exprAdd returns [node]
-    : ^('+' a=exprAdd b=exprAdd) { $node = new L.Add($a.node, $b.node); }
-    | ^('-' a=exprAdd b=exprAdd) { $node = new L.Sub($a.node, $b.node); }
-    | ^('*' a=exprAdd b=exprAdd) { $node = new L.Mult($a.node, $b.node); }
-    | ^('/' a=exprAdd b=exprAdd) { $node = new L.Divide($a.node, $b.node); }
-    | ^('==' a=exprAdd b=exprAdd) { $node = new L.Eq($a.node, $b.node); }
-    | ^('!=' a=exprAdd b=exprAdd) { $node = new L.Neq($a.node, $b.node); }
-    | ^('>' a=exprAdd b=exprAdd) { $node = new L.Gt($a.node, $b.node); }
-    | ^('<' a=exprAdd b=exprAdd) { $node = new L.Lt($a.node, $b.node); }
-    | ^('&&' a=exprAdd b=exprAdd) { $node = new L.And($a.node, $b.node); }
-    | ^('||' a=exprAdd b=exprAdd) { $node = new L.Or($a.node, $b.node); }
-    | ^('>=' a=exprAdd b=exprAdd) { $node = new L.Gte($a.node, $b.node); }
-    | ^('<=' a=exprAdd b=exprAdd) { $node = new L.Lte($a.node, $b.node); }
-    | ^('!' a=exprAdd) { $node = new L.Negate($a.node); }
+expr returns [node]
+    : ^('+' a=expr b=expr) { $node = new L.Add($a.node, $b.node); }
+    | ^('-' a=expr b=expr) { $node = new L.Sub($a.node, $b.node); }
+    | ^('*' a=expr b=expr) { $node = new L.Mult($a.node, $b.node); }
+    | ^('/' a=expr b=expr) { $node = new L.Divide($a.node, $b.node); }
+    | ^('==' a=expr b=expr) { $node = new L.Eq($a.node, $b.node); }
+    | ^('!=' a=expr b=expr) { $node = new L.Neq($a.node, $b.node); }
+    | ^('>' a=expr b=expr) { $node = new L.Gt($a.node, $b.node); }
+    | ^('<' a=expr b=expr) { $node = new L.Lt($a.node, $b.node); }
+    | ^('&&' a=expr b=expr) { $node = new L.And($a.node, $b.node); }
+    | ^('||' a=expr b=expr) { $node = new L.Or($a.node, $b.node); }
+    | ^('>=' a=expr b=expr) { $node = new L.Gte($a.node, $b.node); }
+    | ^('<=' a=expr b=expr) { $node = new L.Lte($a.node, $b.node); }
+    | ^('!' a=expr) { $node = new L.Negate($a.node); }
     | i=INTEGER { 
         var valueInt = new L.Value($i.text, L.T.INT);
         $node = new L.Literal(valueInt);
