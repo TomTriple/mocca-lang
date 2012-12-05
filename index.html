@@ -6,48 +6,30 @@
 <script type="text/javascript" src="Ex1TestLexer.js"></script>
 <script type="text/javascript" src="Ex1TestParser.js"></script>
 <script type="text/javascript" src="Ex1Walker.js"></script>
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="main.js"></script>
 
-<script type="text/javascript">
-
-  var 
-  input =  'five: 5;';
-  input += 'six: 6;';
-  input += 'truth: T;';
-  input += 'assert five == 5 && six == 6 && truth == T;'
-  input += 'result1: (five+five)*2 == six + 7 * 2;';
-  input += 'assert result1;';
-  input += 'result2: five < six;';
-  input += 'assert result2;';
-  input += 'allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);';
-  input += 'assert allTrue;';
-  input += 'puts !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));';
-  input += 'puts 34;';
-
-  var cstream = new org.antlr.runtime.ANTLRStringStream(input);
-  var lexer = new Ex1TestLexer(cstream);
-  var tstream = new org.antlr.runtime.CommonTokenStream(lexer);
-  var parser = new Ex1TestParser(tstream);
-  var r = parser.prog();
-  // console.debug(r.getTree().toStringTree());
-
-var nodes = new org.antlr.runtime.tree.CommonTreeNodeStream(r.getTree());
-nodes.setTokenStream(tstream);
-var walker = new Ex1Walker(nodes);
-walker.prog().interpret();
-
+<script type="text/mocca">
+  five: 5;
+  six: 6;
+  truth: T;
+  assert five == 5 && six == 6 && truth == T;
+  result1: (five+five)*2 == six + 7 * 2;
+  assert result1;
+  result2: five < six;
+  assert result2;
+  allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);
+  assert allTrue;
+  puts !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));
+  puts 34;
 </script>
 
-<script type="text/javascript">
 
-</script>
+   </head>
+   <body>
 
-                       </head>
-                       <body>
+     <div></div>
 
-                         <div>
-                          <textarea id="editor"></textarea>
-                         </div>
-
-                       </body>
-                     </html>
+   </body>
+ </html>
 
