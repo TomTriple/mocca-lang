@@ -17,7 +17,7 @@ prog: exprStmt* EOF -> exprStmt*
     ;
 
 exprStmt: ID ':' expr ';' -> ^(':' ID expr)
-        | ID expr ';' -> ^(FN_CALL ID expr)
+        | ID e+=expr (':' e+=expr)* ';' -> ^(FN_CALL ID expr*)
         ;
 
 expr: (exprAnd -> exprAnd) 

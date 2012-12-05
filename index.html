@@ -13,11 +13,15 @@
   input =  'five: 5;';
   input += 'six: 6;';
   input += 'truth: T;';
-  input += 'myValue: (five - 4 / 2 + 7) / 45 + 5;';
+  input += 'assert five == 5 && six == 6 && truth == T;'
   input += 'result1: (five+five)*2 == six + 7 * 2;';
+  input += 'assert result1;';
   input += 'result2: five < six;';
+  input += 'assert result2;';
   input += 'allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);';
-  input += 'puts !!((five + six >= 11) && allTrue && T);';
+  input += 'assert allTrue;';
+  input += 'puts !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));';
+  input += 'puts 34;';
 
   var cstream = new org.antlr.runtime.ANTLRStringStream(input);
   var lexer = new Ex1TestLexer(cstream);

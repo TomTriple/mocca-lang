@@ -263,16 +263,29 @@ options {
     };
   };
 
-  L.FunctionCall = function(scope, id, node) {
+  L.FunctionCall = function(scope, id) {
     this.scope = scope;
     this.id = id;
-    this.node = node;
+    this.arguments = [];
+    this.addArgument = function(arg) {
+      this.arguments.push(arg);
+    };
     this.interpret = function(){
-      var fn = this.scope.resolve(id);
-      if(fn !== undefined && fn.value.isFunction())
-        fn.value.toFunction().invoke(this.node);
-      else
+      var argumentsValues = [];
+      this.arguments.forEach(function(arg) {
+        argumentsValues.push(arg.interpret());
+      });
+      var sym = this.scope.resolve(id);
+      if(sym !== undefined && sym.value.isFunction()) {
+        var fn = sym.value.toFunction();
+        if(this.arguments.length === fn.arguments.length) {
+          return fn.invoke(argumentsValues);
+        } else {
+          throw new Error("<FunctionCall: length of formal arguments != actual arguments>");
+        }
+      } else {
         throw new Error("<FunctionCall: fn "+this.id+" is undefined or not a function>");
+      }
     };
   };
 
@@ -321,17 +334,24 @@ options {
     this.value = value;
   };
 
-  L.PutsFunction = function() {
-    this.invoke = function(args){
-      var result = args.interpret();
-      console.debug(result.toString());
-    };
-  };
-
   this.currentScope = new L.Scope("global", undefined);
-  var putsFnValue = new L.Value(new L.PutsFunction(), L.T.FN);
-  this.currentScope.define(new L.SymVar("puts", putsFnValue));
-
+  this.currentScope.define(new L.SymVar("puts", new L.Value({
+      arguments: [1],
+      invoke: function(arguments) {
+        var arg = arguments[0];
+        console.debug(arg.toString());
+      }
+    }, L.T.FN)
+  ));
+  this.currentScope.define(new L.SymVar("assert", new L.Value({
+      arguments: [1],
+      invoke: function(arguments) {
+        var arg = arguments[0];
+        if(!arg.toBoolean() === true)
+          throw new Error("AssertionError");
+      }
+    }, L.T.FN)
+  ));
 }
 
 
@@ -343,7 +363,7 @@ prog returns [node]
 
 exprStmt returns [node]
         : ^(':' ID exprAdd) { $node = new L.Assignment(this.currentScope, $ID.text, $exprAdd.node); }
-        | ^(FN_CALL ID exprAdd) { $node = new L.FunctionCall(this.currentScope, $ID.text, $exprAdd.node); }
+        | ^(FN_CALL ID {var node = new L.FunctionCall(this.currentScope, $ID.text);} (e=exprAdd {node.addArgument($e.node);})*) { $node = node; }
         ;
 
 exprAdd returns [node]
