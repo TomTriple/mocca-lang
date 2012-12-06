@@ -410,6 +410,10 @@ exprStmt returns [node]
           this.popScope();
         }
         | ^(EX expr) { $node = $expr.node; }
+        | ^(FN_DEF_INLINE name=ID {var node = new L.FunctionDef(this.currentScope, $name.text, this.pushScope()); } (e=exprStmt { node.body.push($e.node); }) ) {
+          $node = node;
+          this.popScope();
+        }
         ;
 
 expr returns [node]

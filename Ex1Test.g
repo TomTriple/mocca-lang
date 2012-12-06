@@ -8,6 +8,7 @@ options {
 tokens {
   FN_CALL;
   FN_DEF;
+  FN_DEF_INLINE;
   EX;
 }
 
@@ -20,6 +21,7 @@ prog: exprStmt* EOF -> exprStmt*
 
 exprStmt: ID ':' expr ';' -> ^(':' ID expr)
         | name=ID ':' '{' (arg+=ID)? (',' arg+=ID)* '=>' body+=exprStmt* '}' ';' -> ^(FN_DEF $name $arg* $body*)
+        | name=ID ':' '=>' inline=exprStmt -> ^(FN_DEF_INLINE $name $inline)
         | expr ';' -> ^(EX expr)
         ;
 
