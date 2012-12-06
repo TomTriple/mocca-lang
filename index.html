@@ -18,12 +18,12 @@
   result2: five < six;
   allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);
   abc: !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));
-  someFn: op1, op2 {
+  someFn: { op1, op2 =>
     two: 2;
-    innerFn: arg {
+    innerFn: { arg =>
       op1 + op2 + two * two + arg;
     };
-    anotherFn: ten {
+    anotherFn: { ten =>
       innerFn(ten) * 2;
     };
   };

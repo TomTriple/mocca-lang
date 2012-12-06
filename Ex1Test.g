@@ -19,7 +19,7 @@ prog: exprStmt* EOF -> exprStmt*
     ;
 
 exprStmt: ID ':' expr ';' -> ^(':' ID expr)
-        | name=ID ':' (arg+=ID)? (',' arg+=ID)* '{' body+=exprStmt* '}' ';' -> ^(FN_DEF $name $arg* $body*)
+        | name=ID ':' '{' (arg+=ID)? (',' arg+=ID)* '=>' body+=exprStmt* '}' ';' -> ^(FN_DEF $name $arg* $body*)
         | expr ';' -> ^(EX expr)
         ;
 
