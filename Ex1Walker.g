@@ -263,6 +263,33 @@ options {
     };
   };
 
+  L.FunctionDef = function(scope, id, localScope) {
+    this.scope = scope;
+    this.id = id;
+    this.args = [];
+    this.body = [];
+    this.localScope = localScope;
+    this.interpret = function() {
+      var that = this;
+      var sym = new L.SymVar(this.id, new L.Value({
+        args: this.args,
+        invoke: function(actualArgs) {
+          for(var i = 0; i < actualArgs.length; i++) {
+            that.localScope.define(new L.SymVar(that.args[i], actualArgs[i]));
+          }
+          var last;
+          for(i = 0; i < that.body.length; i++) {
+            var stmt = that.body[i];
+            last = stmt.interpret();
+          }
+          return last;
+        }
+      }, L.T.FN));
+      this.scope.define(sym);
+      return sym.value;
+    };
+  };
+
   L.FunctionCall = function(scope, id) {
     this.scope = scope;
     this.id = id;
@@ -334,24 +361,39 @@ options {
     this.value = value;
   };
 
-  this.currentScope = new L.Scope("global", undefined);
-  this.currentScope.define(new L.SymVar("puts", new L.Value({
-      args: [1],
-      invoke: function(args) {
-        var arg = args[0];
-        console.debug(arg.toString());
-      }
-    }, L.T.FN)
-  ));
-  this.currentScope.define(new L.SymVar("assert", new L.Value({
-      args: [1],
-      invoke: function(args) {
-        var arg = args[0];
-        if(!arg.toBoolean() === true)
-          throw new Error("AssertionError");
-      }
-    }, L.T.FN)
-  ));
+  L.GlobalScope = function(){
+
+    L.Scope.call(this, "global", undefined);
+    this.define(new L.SymVar("puts", new L.Value({
+        args: [1],
+        invoke: function(args) {
+          var arg = args[0];
+          console.debug(arg.toString());
+        }
+      }, L.T.FN)
+    ));
+    this.define(new L.SymVar("assert", new L.Value({
+        args: [1],
+        invoke: function(args) {
+          var arg = args[0];
+          if(!arg.toBoolean() === true)
+            throw new Error("AssertionError");
+        }
+      }, L.T.FN)
+    ));
+
+  };
+  L.GlobalScope.prototype = L.Scope.prototype;
+  this.currentScope = new L.GlobalScope();
+  this.oldScope;
+  this.pushScope = function() {
+    this.oldScope = this.currentScope;
+    this.currentScope = new L.Scope("block", this.oldScope);
+    return this.currentScope;
+  };
+  this.popScope = function() {
+    this.currentScope = this.currentScope.getEnclosingScope();
+  };
 }
 
 
@@ -363,7 +405,11 @@ prog returns [node]
 
 exprStmt returns [node]
         : ^(':' ID expr) { $node = new L.Assignment(this.currentScope, $ID.text, $expr.node); }
-        | ^(FN_CALL ID {var node = new L.FunctionCall(this.currentScope, $ID.text);} (e=expr {node.addArgument($e.node);})*) { $node = node; }
+        | ^(FN_DEF name=ID {var node = new L.FunctionDef(this.currentScope, $name.text, this.pushScope()); } (arg=ID {node.args.push($arg.text);} )* (e=exprStmt { node.body.push($e.node); })* ) {
+          $node = node;
+          this.popScope();
+        }
+        | ^(EX expr) { $node = $expr.node; }
         ;
 
 expr returns [node]
@@ -380,6 +426,7 @@ expr returns [node]
     | ^('>=' a=expr b=expr) { $node = new L.Gte($a.node, $b.node); }
     | ^('<=' a=expr b=expr) { $node = new L.Lte($a.node, $b.node); }
     | ^('!' a=expr) { $node = new L.Negate($a.node); }
+    | ^(FN_CALL ID {var node = new L.FunctionCall(this.currentScope, $ID.text);} (e=expr {node.addArgument($e.node);})*) { $node = node; }
     | i=INTEGER { 
         var valueInt = new L.Value($i.text, L.T.INT);
         $node = new L.Literal(valueInt);

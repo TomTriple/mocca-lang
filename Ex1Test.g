@@ -7,6 +7,8 @@ options {
 
 tokens {
   FN_CALL;
+  FN_DEF;
+  EX;
 }
 
 @members {
@@ -17,7 +19,8 @@ prog: exprStmt* EOF -> exprStmt*
     ;
 
 exprStmt: ID ':' expr ';' -> ^(':' ID expr)
-        | ID e+=expr (':' e+=expr)* ';' -> ^(FN_CALL ID expr*)
+        | name=ID ':' (arg+=ID)? (',' arg+=ID)* '{' body+=exprStmt* '}' ';' -> ^(FN_DEF $name $arg* $body*)
+        | expr ';' -> ^(EX expr)
         ;
 
 expr: (exprAnd -> exprAnd) 
@@ -72,6 +75,7 @@ unary: atom
 // doesn´t make much sense. Cases like this need to be catched in the semantic analysis phase.
 atom: INTEGER
      | ID
+     | ID '(' e+=expr? (',' e+=expr)* ')' -> ^(FN_CALL ID $e*)
      | BOOLEAN
      | '(' expr ')' -> expr
      ;

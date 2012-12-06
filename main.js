@@ -11,7 +11,7 @@
 
     var nodes = new org.antlr.runtime.tree.CommonTreeNodeStream(r.getTree());
     nodes.setTokenStream(tstream);
-    var walker = new Ex1Walker(nodes);
+     walker = new Ex1Walker(nodes);
     walker.prog().interpret();
   });
 

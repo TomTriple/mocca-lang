@@ -2,23 +2,35 @@
 <html lang="en">
   <head>
 
-<script type="text/javascript" src="mocca-lang.js"></script>
+<script type="text/javascript" src="antlr3-all.js"></script>
+<script type="text/javascript" src="Ex1TestLexer.js"></script>
+<script type="text/javascript" src="Ex1TestParser.js"></script>
+<script type="text/javascript" src="Ex1Walker.js"></script>
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="main.js"></script>
+
 
 <script type="text/mocca">
 
   five: 5;
   six: 6;
-  truth: T;
-  assert five == 5 && six == 6 && truth == T;
   result1: (five+five)*2 == six + 7 * 2;
-  assert result1;
   result2: five < six;
-  assert result2;
   allTrue: 6 <= 6 || T == F || F || (result1 == result2 && result2 == result1 && (five - six * 2 + 200) < six || F);
-  assert allTrue;
-  puts !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));
-  puts 34;
-
+  abc: !!!!!!!!!!!!!!(!!!!!!!(((((((five + six >= 11) && allTrue && T)))))));
+  someFn: op1, op2 {
+    two: 2;
+    innerFn: arg {
+      op1 + op2 + two * two + arg;
+    };
+    anotherFn: ten {
+      innerFn(ten) * 2;
+    };
+  };
+  fnResult: someFn(77, 9);
+  assert(fnResult(10) == 200);
+    
+    
 </script>
 
 
