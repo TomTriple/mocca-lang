@@ -77,11 +77,15 @@ unary: atom
 // doesn´t make much sense. Cases like this need to be catched in the semantic analysis phase.
 atom: INTEGER
      | ID
-     | ID '(' e+=expr? (',' e+=expr)* ')' -> ^(FN_CALL ID $e*)
      | BOOLEAN
      | '(' expr ')' -> expr
+     | fn
+     | 'if' cond=expr ':' body=exprStmt -> ^('if' $cond $body)
      ;
 
+fn: ID '(' e+=expr? (',' e+=expr)* ')' -> ^(FN_CALL ID $e*)
+//  | (ID '(' expr? (',' expr)* ')' '{')=>ID '(' x+=expr? (',' x+=expr)* ')' '{' body=exprStmt '}' -> ^(FN_CALL_LAZY ID $x* $body)
+  ;
 
 BOOLEAN: ('T'|'F');
 ID: CHAR (CHAR|'0'..'9'|'.')*;
@@ -90,6 +94,5 @@ STRING: '"' (.)* '"';
 WS: (' '|'\t'|'\r'|'\n') { this.skip(); };
 
 fragment CHAR: 'a'..'z'|'A'..'Z';
-
 
 
